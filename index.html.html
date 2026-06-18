@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Checklist Techout</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
+
+  :root {
+    --bg: #f5f4f0;
+    --white: #ffffff;
+    --border: #e2e0d8;
+    --text: #1a1a18;
+    --muted: #8a8880;
+    --techout: #e8531e;
+    --techout-soft: #fff2ee;
+    --vanuza: #2563eb;
+    --vanuza-soft: #eff6ff;
+    --brenda: #7c3aed;
+    --brenda-soft: #f5f3ff;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --green-check: #22c55e;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--techout);
+    letter-spacing: -0.3px;
+  }
+
+  .logo span { color: var(--text); }
+
+  .date-badge {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* TURNO SELECTOR */
+  .turno-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .turno-btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+
+  .turno-btn .t-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  .turno-btn .t-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .turno-btn .t-hora {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+    display: block;
+  }
+
+  .turno-btn.active-vanuza {
+    border-color: var(--vanuza);
+    background: var(--vanuza-soft);
+  }
+  .turno-btn.active-vanuza .t-label { color: var(--vanuza); }
+  .turno-btn.active-vanuza .t-name { color: var(--vanuza); }
+
+  .turno-btn.active-brenda {
+    border-color: var(--brenda);
+    background: var(--brenda-soft);
+  }
+  .turno-btn.active-brenda .t-label { color: var(--brenda); }
+  .turno-btn.active-brenda .t-name { color: var(--brenda); }
+
+  /* MAIN */
+  main { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .progress-count { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .progress-count span { color: var(--green); }
+
+  .progress-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--green-check);
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  /* ITEM */
+  .item {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow);
+  }
+
+  .item.checked {
+    border-color: var(--green-check);
+    background: var(--green-soft);
+  }
+
+  .item.nao-ok {
+    border-color: var(--red);
+    background: var(--red-soft);
+  }
+
+  .item-main {
+    display: flex;
+    align-items: center;
+    padding: 14px 14px;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .item-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    width: 32px;
+    text-align: center;
+  }
+
+  .item-text { flex: 1; }
+  .item-title { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .item-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .item.checked .item-title { color: var(--green); }
+  .item.nao-ok .item-title { color: var(--red); }
+
+  /* BOTÕES OK / NÃO OK */
+  .item-actions {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+
+  .item.checked .item-actions { border-top-color: rgba(34,197,94,0.2); }
+  .item.nao-ok .item-actions { border-top-color: rgba(220,38,38,0.2); }
+
+  .btn-ok, .btn-nok {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .btn-ok { color: var(--green); border-right: 1px solid var(--border); }
+  .btn-nok { color: var(--red); }
+
+  .btn-ok:hover { background: var(--green-soft); }
+  .btn-nok:hover { background: var(--red-soft); }
+
+  .item.checked .btn-ok {
+    background: rgba(34,197,94,0.15);
+    border-right-color: rgba(34,197,94,0.2);
+  }
+  .item.nao-ok .btn-nok { background: rgba(220,38,38,0.12); }
+
+  /* OBSERVAÇÃO */
+  .obs-wrap {
+    padding: 0 14px 12px;
+    display: none;
+  }
+
+  .obs-wrap.visible { display: block; }
+
+  .obs-wrap textarea {
+    width: 100%;
+    border: 1.5px solid var(--red);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--white);
+    resize: none;
+    min-height: 60px;
+    outline: none;
+  }
+
+  .obs-wrap textarea::placeholder { color: var(--muted); }
+  .obs-label { font-size: 11px; font-weight: 600; color: var(--red); margin-bottom: 5px; display: block; }
+
+  /* SUBMIT */
+  .submit-wrap {
+    margin-top: 24px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--techout);
+    color: white;
+    box-shadow: 0 4px 12px rgba(232,83,30,0.3);
+  }
+
+  .btn-submit:disabled {
+    background: var(--border);
+    color: var(--muted);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .btn-submit:not(:disabled):hover {
+    background: #c94418;
+    box-shadow: 0 6px 16px rgba(232,83,30,0.35);
+  }
+
+  /* TELA DE CONCLUSÃO */
+  .done-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .done-screen.visible { display: block; }
+
+  .done-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .done-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .done-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+
+  .done-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: left;
+    box-shadow: var(--shadow);
+  }
+
+  .done-card h4 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+  .done-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .done-row:last-child { border-bottom: none; }
+  .done-row .dr-icon { font-size: 16px; flex-shrink: 0; }
+  .done-row .dr-text { flex: 1; }
+  .done-row .dr-status { font-weight: 700; font-size: 12px; }
+  .done-row .dr-obs { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  .status-ok { color: var(--green); }
+  .status-nok { color: var(--red); }
+  .status-skip { color: var(--muted); }
+
+  .btn-novo {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--techout);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--techout);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-novo:hover { background: var(--techout-soft); }
+
+  /* TURNO INDICATOR */
+  .turno-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .turno-pill-v { background: var(--vanuza-soft); color: var(--vanuza); }
+  .turno-pill-b { background: var(--brenda-soft); color: var(--brenda); }
+
+  /* HIDDEN */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Tech<span>out</span></div>
+    <div class="date-badge" id="dateBadge">—</div>
+  </div>
+  <div class="turno-selector">
+    <button class="turno-btn" id="btnVanuza" onclick="selecionarTurno('vanuza')">
+      <span class="t-label">Turno Manhã</span>
+      <span class="t-name">Vanuza</span>
+      <span class="t-hora">07h00 – 16h00</span>
+    </button>
+    <button class="turno-btn" id="btnBrenda" onclick="selecionarTurno('brenda')">
+      <span class="t-label">Turno Tarde/Noite</span>
+      <span class="t-name">Brenda</span>
+      <span class="t-hora">13h00 – 22h00</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <!-- CHECKLIST -->
+  <div id="checklistWrap" class="hidden">
+
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Progresso da conferência</span>
+        <span class="progress-count"><span id="countOk">0</span> / <span id="countTotal">0</span> itens</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: LIMPEZA -->
+    <div class="section">
+      <div class="section-title">🧹 Limpeza do espaço</div>
+
+      <div class="item" id="item-chao">
+        <div class="item-main" onclick="toggleObs('chao')">
+          <div class="item-icon">🏠</div>
+          <div class="item-text">
+            <div class="item-title">Chão limpo</div>
+            <div class="item-sub">Sem resíduos, gordura ou umidade no piso</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('chao','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('chao','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-chao">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-chao" placeholder="Ex: resíduo próximo ao forno..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-bancadas">
+        <div class="item-main" onclick="toggleObs('bancadas')">
+          <div class="item-icon">🪵</div>
+          <div class="item-text">
+            <div class="item-title">Bancadas limpas</div>
+            <div class="item-sub">Superfícies de preparo higienizadas e secas</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('bancadas','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('bancadas','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-bancadas">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-bancadas" placeholder="Ex: restos de alimento na bancada direita..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-estufa">
+        <div class="item-main" onclick="toggleObs('estufa')">
+          <div class="item-icon">🫙</div>
+          <div class="item-text">
+            <div class="item-title">Estufa limpa</div>
+            <div class="item-sub">Interior e bandejas sem resíduos ou gordura</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('estufa','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('estufa','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-estufa">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-estufa" placeholder="Ex: bandejas com gordura acumulada..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-pia">
+        <div class="item-main" onclick="toggleObs('pia')">
+          <div class="item-icon">🚿</div>
+          <div class="item-text">
+            <div class="item-title">Pia limpa</div>
+            <div class="item-sub">Pia e ralo sem resíduos, sabão disponível</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('pia','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('pia','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-pia">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-pia" placeholder="Ex: ralo entupido..."></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SEÇÃO: EQUIPAMENTOS -->
+    <div class="section">
+      <div class="section-title">⚙️ Equipamentos</div>
+
+      <div class="item" id="item-misteira">
+        <div class="item-main" onclick="toggleObs('misteira')">
+          <div class="item-icon">🥣</div>
+          <div class="item-text">
+            <div class="item-title">Misteira limpa</div>
+            <div class="item-sub">Interior, pá e vedação higienizados</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('misteira','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('misteira','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-misteira">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-misteira" placeholder="Ex: resíduo de açaí na pá..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-microondas">
+        <div class="item-main" onclick="toggleObs('microondas')">
+          <div class="item-icon">📡</div>
+          <div class="item-text">
+            <div class="item-title">Microondas limpo</div>
+            <div class="item-sub">Interior sem respingos ou odores</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('microondas','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('microondas','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-microondas">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-microondas" placeholder="Ex: respingos de molho no teto interno..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-forno">
+        <div class="item-main" onclick="toggleObs('forno')">
+          <div class="item-icon">🔥</div>
+          <div class="item-text">
+            <div class="item-title">Forno limpo</div>
+            <div class="item-sub">Grelhas, assadeiras e interior sem gordura</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('forno','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('forno','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-forno">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-forno" placeholder="Ex: gordura acumulada nas grelhas..."></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SEÇÃO: ESTOQUE E PRODUÇÃO -->
+    <div class="section">
+      <div class="section-title">📦 Estoque e Produção</div>
+
+      <div class="item" id="item-geladeira">
+        <div class="item-main" onclick="toggleObs('geladeira')">
+          <div class="item-icon">🧊</div>
+          <div class="item-text">
+            <div class="item-title">Geladeira abastecida</div>
+            <div class="item-sub">Produtos repostos, organizados e dentro da validade</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('geladeira','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('geladeira','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-geladeira">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-geladeira" placeholder="Ex: suco de laranja em falta..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-fermentando">
+        <div class="item-main" onclick="toggleObs('fermentando')">
+          <div class="item-icon">🫓</div>
+          <div class="item-text">
+            <div class="item-title">Salgados fermentando</div>
+            <div class="item-sub">Massa separada e em processo de fermentação para o dia</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('fermentando','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('fermentando','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-fermentando">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-fermentando" placeholder="Ex: massa não preparada..."></textarea>
+        </div>
+      </div>
+
+      <div class="item" id="item-embalados">
+        <div class="item-main" onclick="toggleObs('embalados')">
+          <div class="item-icon">📦</div>
+          <div class="item-text">
+            <div class="item-title">Salgados do dia anterior embalados</div>
+            <div class="item-sub">Sobras identificadas com data, embaladas e refrigeradas corretamente</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="btn-ok" onclick="marcar('embalados','ok')">✔ OK</button>
+          <button class="btn-nok" onclick="marcar('embalados','nok')">✘ Não OK</button>
+        </div>
+        <div class="obs-wrap" id="obs-embalados">
+          <span class="obs-label">Descreva o problema:</span>
+          <textarea id="txt-embalados" placeholder="Ex: salgados soltos sem embalagem na geladeira..."></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="submit-wrap">
+      <button class="btn-submit" id="btnSubmit" onclick="finalizar()" disabled>
+        Confirmar conferência
+      </button>
+    </div>
+
+  </div><!-- /checklistWrap -->
+
+  <!-- TELA INICIAL -->
+  <div id="telaInicial" style="text-align:center;padding:48px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">📋</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Checklist de Conformidade</div>
+    <div style="color:var(--muted);font-size:14px;line-height:1.6;">Selecione seu turno acima<br>para iniciar a conferência do espaço.</div>
+  </div>
+
+  <!-- TELA CONCLUSÃO -->
+  <div class="done-screen" id="doneTela">
+    <span class="done-icon" id="doneIcon">✅</span>
+    <div class="done-title" id="doneTitle">Conferência concluída!</div>
+    <div class="done-sub" id="doneSub">—</div>
+
+    <div class="done-card" id="doneCard">
+      <h4>Resumo da conferência</h4>
+      <div id="doneRows"></div>
+    </div>
+
+    <button class="btn-novo" onclick="reiniciar()">Nova conferência</button>
+  </div>
+
+</main>
+
+<script>
+const ITENS = [
+  { id: 'chao',        label: 'Chão limpo',                          icon: '🏠' },
+  { id: 'bancadas',    label: 'Bancadas limpas',                     icon: '🪵' },
+  { id: 'estufa',      label: 'Estufa limpa',                        icon: '🫙' },
+  { id: 'pia',         label: 'Pia limpa',                           icon: '🚿' },
+  { id: 'misteira',    label: 'Misteira limpa',                      icon: '🥣' },
+  { id: 'microondas',  label: 'Microondas limpo',                    icon: '📡' },
+  { id: 'forno',       label: 'Forno limpo',                         icon: '🔥' },
+  { id: 'geladeira',   label: 'Geladeira abastecida',                icon: '🧊' },
+  { id: 'fermentando', label: 'Salgados fermentando',                icon: '🫓' },
+  { id: 'embalados',   label: 'Salgados anteriores embalados',       icon: '📦' },
+];
+
+let turnoAtual = null;
+let estado = {}; // { id: 'ok' | 'nok' | null }
+
+// init
+ITENS.forEach(i => estado[i.id] = null);
+document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' });
+document.getElementById('countTotal').textContent = ITENS.length;
+
+function selecionarTurno(turno) {
+  turnoAtual = turno;
+  document.getElementById('btnVanuza').className = 'turno-btn' + (turno === 'vanuza' ? ' active-vanuza' : '');
+  document.getElementById('btnBrenda').className = 'turno-btn' + (turno === 'brenda' ? ' active-brenda' : '');
+  document.getElementById('telaInicial').classList.add('hidden');
+  document.getElementById('doneTela').classList.remove('visible');
+  document.getElementById('checklistWrap').classList.remove('hidden');
+  // reset
+  ITENS.forEach(i => {
+    estado[i.id] = null;
+    document.getElementById('item-' + i.id).className = 'item';
+    document.getElementById('obs-' + i.id).classList.remove('visible');
+    document.getElementById('txt-' + i.id).value = '';
+  });
+  atualizar();
+}
+
+function marcar(id, valor) {
+  estado[id] = estado[id] === valor ? null : valor;
+  const el = document.getElementById('item-' + id);
+  const obsWrap = document.getElementById('obs-' + id);
+  if (estado[id] === 'ok') {
+    el.className = 'item checked';
+    obsWrap.classList.remove('visible');
+  } else if (estado[id] === 'nok') {
+    el.className = 'item nao-ok';
+    obsWrap.classList.add('visible');
+  } else {
+    el.className = 'item';
+    obsWrap.classList.remove('visible');
+  }
+  atualizar();
+}
+
+function toggleObs(id) {
+  // apenas expansão visual — botões controlam estado
+}
+
+function atualizar() {
+  const respondidos = ITENS.filter(i => estado[i.id] !== null).length;
+  const oks = ITENS.filter(i => estado[i.id] === 'ok').length;
+  document.getElementById('countOk').textContent = oks;
+  document.getElementById('progressFill').style.width = (respondidos / ITENS.length * 100) + '%';
+  document.getElementById('btnSubmit').disabled = respondidos < ITENS.length;
+}
+
+function finalizar() {
+  const noks = ITENS.filter(i => estado[i.id] === 'nok');
+  const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const nomeT = turnoAtual === 'vanuza' ? 'Vanuza' : 'Brenda';
+
+  document.getElementById('checklistWrap').classList.add('hidden');
+  const doneTela = document.getElementById('doneTela');
+  doneTela.classList.add('visible');
+
+  if (noks.length === 0) {
+    document.getElementById('doneIcon').textContent = '✅';
+    document.getElementById('doneTitle').textContent = 'Tudo conforme!';
+    document.getElementById('doneSub').textContent = `Conferência de ${nomeT} concluída às ${hora}. Nenhuma pendência registrada.`;
+  } else {
+    document.getElementById('doneIcon').textContent = '⚠️';
+    document.getElementById('doneTitle').textContent = `${noks.length} pendência${noks.length > 1 ? 's' : ''} registrada${noks.length > 1 ? 's' : ''}`;
+    document.getElementById('doneSub').textContent = `Conferência de ${nomeT} — ${hora}. Os itens abaixo precisam de atenção.`;
+  }
+
+  const rows = ITENS.map(item => {
+    const s = estado[item.id];
+    const obs = document.getElementById('txt-' + item.id).value.trim();
+    let statusLabel, statusClass;
+    if (s === 'ok') { statusLabel = 'OK'; statusClass = 'status-ok'; }
+    else if (s === 'nok') { statusLabel = 'Não OK'; statusClass = 'status-nok'; }
+    else { statusLabel = '—'; statusClass = 'status-skip'; }
+    return `
+      <div class="done-row">
+        <span class="dr-icon">${item.icon}</span>
+        <div class="dr-text">
+          <div>${item.label}</div>
+          ${obs ? `<div class="dr-obs">${obs}</div>` : ''}
+        </div>
+        <span class="dr-status ${statusClass}">${statusLabel}</span>
+      </div>`;
+  }).join('');
+
+  document.getElementById('doneRows').innerHTML = rows;
+}
+
+function reiniciar() {
+  document.getElementById('doneTela').classList.remove('visible');
+  document.getElementById('telaInicial').classList.remove('hidden');
+  document.getElementById('btnVanuza').className = 'turno-btn';
+  document.getElementById('btnBrenda').className = 'turno-btn';
+  turnoAtual = null;
+  ITENS.forEach(i => estado[i.id] = null);
+}
+</script>
+
+</body>
+</html>
