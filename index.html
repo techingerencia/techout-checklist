@@ -15,10 +15,6 @@
     --muted: #8a8880;
     --techout: #e8531e;
     --techout-soft: #fff2ee;
-    --vanuza: #2563eb;
-    --vanuza-soft: #eff6ff;
-    --brenda: #7c3aed;
-    --brenda-soft: #f5f3ff;
     --green: #16a34a;
     --green-soft: #f0fdf4;
     --green-check: #22c55e;
@@ -78,7 +74,7 @@
     border: 1px solid var(--border);
   }
 
-  /* TURNO SELECTOR */
+  /* SELETOR DE COLABORADOR (dinâmico, vem do cadastro de Equipe do Gestor Techset) */
   .turno-selector {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -110,27 +106,6 @@
     font-weight: 700;
     color: var(--text);
   }
-
-  .turno-btn .t-hora {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 1px;
-    display: block;
-  }
-
-  .turno-btn.active-vanuza {
-    border-color: var(--vanuza);
-    background: var(--vanuza-soft);
-  }
-  .turno-btn.active-vanuza .t-label { color: var(--vanuza); }
-  .turno-btn.active-vanuza .t-name { color: var(--vanuza); }
-
-  .turno-btn.active-brenda {
-    border-color: var(--brenda);
-    background: var(--brenda-soft);
-  }
-  .turno-btn.active-brenda .t-label { color: var(--brenda); }
-  .turno-btn.active-brenda .t-name { color: var(--brenda); }
 
   /* MAIN */
   main { padding: 20px 16px; max-width: 480px; margin: 0 auto; }
@@ -418,23 +393,13 @@
 
   .btn-whatsapp:hover { background: #1fb855; box-shadow: 0 6px 16px rgba(37,211,102,0.4); }
 
-  /* TURNO INDICATOR */
-  .turno-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .turno-pill-v { background: var(--vanuza-soft); color: var(--vanuza); }
-  .turno-pill-b { background: var(--brenda-soft); color: var(--brenda); }
-
   /* HIDDEN */
   .hidden { display: none !important; }
 </style>
+
+<!-- Firebase (SDK compat, sem necessidade de bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -443,17 +408,8 @@
     <div class="logo">Tech<span>out</span></div>
     <div class="date-badge" id="dateBadge">—</div>
   </div>
-  <div class="turno-selector">
-    <button class="turno-btn" id="btnVanuza" onclick="selecionarTurno('vanuza')">
-      <span class="t-label">Turno Manhã</span>
-      <span class="t-name">07h – 16h</span>
-      <span class="t-hora">Abertura do quiosque</span>
-    </button>
-    <button class="turno-btn" id="btnBrenda" onclick="selecionarTurno('brenda')">
-      <span class="t-label">Turno Tarde/Noite</span>
-      <span class="t-name">13h – 22h</span>
-      <span class="t-hora">Fechamento do quiosque</span>
-    </button>
+  <div class="turno-selector" id="colabSelector">
+    <div style="grid-column:1/-1;font-size:12px;color:var(--muted);padding:8px;text-align:center;">Carregando funcionários…</div>
   </div>
 </div>
 
@@ -682,7 +638,7 @@
   <div id="telaInicial" style="text-align:center;padding:48px 20px;">
     <div style="font-size:48px;margin-bottom:16px;">📋</div>
     <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;">Checklist de Conformidade</div>
-    <div style="color:var(--muted);font-size:14px;line-height:1.6;">Selecione seu turno acima<br>para iniciar a conferência do espaço.</div>
+    <div style="color:var(--muted);font-size:14px;line-height:1.6;">Selecione seu nome acima<br>para iniciar a conferência do espaço.</div>
   </div>
 
   <!-- TELA CONCLUSÃO -->
@@ -706,6 +662,47 @@
 </main>
 
 <script>
+// ========== FIREBASE (mesmo projeto do Gestor Techset — sem login aqui de propósito) ==========
+const firebaseConfig = {
+  apiKey: "AIzaSyDPtVbOcSx5qdok4CwGfaL0m4SQYUAI7NU",
+  authDomain: "techset-gestor.firebaseapp.com",
+  projectId: "techset-gestor",
+  storageBucket: "techset-gestor.firebasestorage.app",
+  messagingSenderId: "548263560140",
+  appId: "1:548263560140:web:668f6bf9cf07ba9ae7d369"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function hexToRgba(hex, alpha) {
+  let h = String(hex).replace('#','');
+  if (h.length === 3) h = h.split('').map(c=>c+c).join('');
+  const r = parseInt(h.substring(0,2),16) || 0;
+  const g = parseInt(h.substring(2,4),16) || 0;
+  const b = parseInt(h.substring(4,6),16) || 0;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Mesmo cálculo de semana ISO usado no Gestor Techset, pra que as discordâncias
+// caiam certinho na semana certa quando forem lidas de lá.
+function getSemanaStr(d) {
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = dt.getUTCDay() || 7;
+  dt.setUTCDate(dt.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((dt - yearStart) / 86400000) + 1) / 7);
+  return `${dt.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
+}
+
+// Mapeia cada item do checklist para a categoria de discordância usada na avaliação semanal
+const CATEGORIA_POR_ITEM = {
+  chao: 'limpeza', bancadas: 'limpeza', estufa: 'limpeza', pia: 'limpeza',
+  misteira: 'equip', microondas: 'equip', forno: 'equip',
+  geladeira: 'gelad',
+  fermentando: 'salgado',
+  embalados: 'embal',
+};
+
 const ITENS = [
   { id: 'chao',        label: 'Chão limpo',                          icon: '🏠' },
   { id: 'bancadas',    label: 'Bancadas limpas',                     icon: '🪵' },
@@ -719,18 +716,62 @@ const ITENS = [
   { id: 'embalados',   label: 'Salgados anteriores embalados',       icon: '📦' },
 ];
 
-let turnoAtual = null;
+let colabAtual = null;
 let estado = {}; // { id: 'ok' | 'nok' | null }
+let FUNCIONARIOS_TECHOUT = [];
 
 // init
 ITENS.forEach(i => estado[i.id] = null);
 document.getElementById('dateBadge').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' });
 document.getElementById('countTotal').textContent = ITENS.length;
 
-function selecionarTurno(turno) {
-  turnoAtual = turno;
-  document.getElementById('btnVanuza').className = 'turno-btn' + (turno === 'vanuza' ? ' active-vanuza' : '');
-  document.getElementById('btnBrenda').className = 'turno-btn' + (turno === 'brenda' ? ' active-brenda' : '');
+// Lista de funcionários do Techout vem direto do cadastro (aba Equipe) do Gestor Techset —
+// qualquer nome/pessoa adicionada, editada ou desativada lá aparece aqui automaticamente.
+db.collection('funcionarios').onSnapshot(snap => {
+  FUNCIONARIOS_TECHOUT = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(f => f.unidade === 'Techout' && f.ativo !== false);
+  renderColabSelector();
+}, err => {
+  console.error('Erro ao carregar funcionários:', err);
+  document.getElementById('colabSelector').innerHTML =
+    '<div style="grid-column:1/-1;font-size:12px;color:var(--red);padding:8px;text-align:center;">Não foi possível conectar. Verifique sua internet e recarregue a página.</div>';
+});
+
+function renderColabSelector() {
+  const wrap = document.getElementById('colabSelector');
+  if (FUNCIONARIOS_TECHOUT.length === 0) {
+    wrap.innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:var(--muted);padding:8px;text-align:center;">Nenhum funcionário do Techout cadastrado. Peça pra gerente cadastrar na aba Equipe do Gestor Techset.</div>';
+    return;
+  }
+  wrap.innerHTML = FUNCIONARIOS_TECHOUT.map(f => `
+    <button class="turno-btn" id="colab-${f.id}" onclick="selecionarColab('${f.id}')">
+      <span class="t-label">${f.funcao || f.unidade}</span>
+      <span class="t-name">${f.nome}</span>
+    </button>`).join('');
+  if (colabAtual) aplicarDestaqueColab(colabAtual);
+}
+
+function aplicarDestaqueColab(id) {
+  FUNCIONARIOS_TECHOUT.forEach(f => {
+    const btn = document.getElementById('colab-' + f.id);
+    if (!btn) return;
+    if (id && f.id === id) {
+      btn.style.borderColor = f.cor;
+      btn.style.background = hexToRgba(f.cor, 0.08);
+      const lbl = btn.querySelector('.t-label'), nm = btn.querySelector('.t-name');
+      if (lbl) lbl.style.color = f.cor;
+      if (nm) nm.style.color = f.cor;
+    } else {
+      btn.removeAttribute('style');
+      btn.querySelectorAll('.t-label,.t-name').forEach(el => el.removeAttribute('style'));
+    }
+  });
+}
+
+function selecionarColab(id) {
+  colabAtual = id;
+  aplicarDestaqueColab(id);
   document.getElementById('telaInicial').classList.add('hidden');
   document.getElementById('doneTela').classList.remove('visible');
   document.getElementById('checklistWrap').classList.remove('hidden');
@@ -773,10 +814,57 @@ function atualizar() {
   document.getElementById('btnSubmit').disabled = respondidos < ITENS.length;
 }
 
-function finalizar() {
+async function finalizar() {
+  const func = FUNCIONARIOS_TECHOUT.find(f => f.id === colabAtual);
+  if (!func) return;
+
   const noks = ITENS.filter(i => estado[i.id] === 'nok');
-  const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const nomeT = turnoAtual === 'vanuza' ? 'Turno Manhã' : 'Turno Tarde/Noite';
+  const hoje = new Date();
+  const hora = hoje.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const dataISO = hoje.toISOString().slice(0, 10);
+  const semana = getSemanaStr(hoje);
+
+  const discordancias = { limpeza: 0, equip: 0, gelad: 0, salgado: 0, embal: 0 };
+  noks.forEach(i => {
+    const cat = CATEGORIA_POR_ITEM[i.id];
+    if (cat) discordancias[cat]++;
+  });
+
+  const itensSalvos = ITENS.map(item => ({
+    id: item.id,
+    label: item.label,
+    status: estado[item.id] || null,
+    obs: (document.getElementById('txt-' + item.id).value || '').trim(),
+  }));
+
+  const registro = {
+    colab: func.id,
+    nome: func.nome,
+    unidade: func.unidade,
+    data: dataISO,
+    dataFormatada: hoje.toLocaleDateString('pt-BR'),
+    hora,
+    semana,
+    itens: itensSalvos,
+    discordancias,
+    totalOk: ITENS.length - noks.length,
+    totalNok: noks.length,
+  };
+
+  const btnSubmit = document.getElementById('btnSubmit');
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = 'Enviando…';
+
+  try {
+    // um documento por funcionário por dia (reenvio no mesmo dia substitui o anterior)
+    await db.collection('checklists').doc(`${func.id}_${dataISO}`).set(registro);
+  } catch (err) {
+    console.error('Erro ao salvar checklist:', err);
+    alert('Não foi possível salvar a conferência. Verifique sua internet e tente novamente.');
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'Confirmar conferência';
+    return;
+  }
 
   document.getElementById('checklistWrap').classList.add('hidden');
   const doneTela = document.getElementById('doneTela');
@@ -785,11 +873,11 @@ function finalizar() {
   if (noks.length === 0) {
     document.getElementById('doneIcon').textContent = '✅';
     document.getElementById('doneTitle').textContent = 'Tudo conforme!';
-    document.getElementById('doneSub').textContent = `Conferência de ${nomeT} concluída às ${hora}. Nenhuma pendência registrada.`;
+    document.getElementById('doneSub').textContent = `Conferência de ${func.nome} concluída às ${hora}. Nenhuma pendência registrada.`;
   } else {
     document.getElementById('doneIcon').textContent = '⚠️';
     document.getElementById('doneTitle').textContent = `${noks.length} pendência${noks.length > 1 ? 's' : ''} registrada${noks.length > 1 ? 's' : ''}`;
-    document.getElementById('doneSub').textContent = `Conferência de ${nomeT} — ${hora}. Os itens abaixo precisam de atenção.`;
+    document.getElementById('doneSub').textContent = `Conferência de ${func.nome} — ${hora}. Os itens abaixo precisam de atenção.`;
   }
 
   const rows = ITENS.map(item => {
@@ -813,23 +901,20 @@ function finalizar() {
   document.getElementById('doneRows').innerHTML = rows;
 
   // Monta mensagem para o WhatsApp
-  const data = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
-  const turnoLabel = turnoAtual === 'vanuza' ? '☀️ Turno Manhã (07h–16h)' : '🌙 Turno Tarde/Noite (13h–22h)';
-  const totalOk = ITENS.filter(i => estado[i.id] === 'ok').length;
-  const totalNok = ITENS.filter(i => estado[i.id] === 'nok').length;
+  const dataLabel = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const totalOk = ITENS.length - noks.length;
+  const totalNok = noks.length;
 
   let msg = `📋 *CHECKLIST TECHOUT*\n`;
-  msg += `${turnoLabel}\n`;
-  msg += `📅 ${data} às ${hora}\n`;
+  msg += `${func.nome}${func.funcao ? ' (' + func.funcao + ')' : ''}\n`;
+  msg += `📅 ${dataLabel} às ${hora}\n`;
   msg += `━━━━━━━━━━━━━━━━━\n\n`;
 
-  // itens OK
   msg += `✅ *Conforme (${totalOk}):*\n`;
   ITENS.filter(i => estado[i.id] === 'ok').forEach(item => {
     msg += `  ${item.icon} ${item.label}\n`;
   });
 
-  // itens NOK
   if (totalNok > 0) {
     msg += `\n⚠️ *Pendências (${totalNok}):*\n`;
     ITENS.filter(i => estado[i.id] === 'nok').forEach(item => {
@@ -842,18 +927,20 @@ function finalizar() {
     msg += `\n✔️ *Nenhuma pendência registrada!*\n`;
   }
 
-  msg += `\n_Enviado via Checklist Techout_`;
+  msg += `\n_Enviado via Checklist Techout — já sincronizado com o Gestor Techset_`;
 
   const linkWA = `https://wa.me/?text=${encodeURIComponent(msg)}`;
   document.getElementById('btnWhatsapp').href = linkWA;
+
+  btnSubmit.disabled = false;
+  btnSubmit.textContent = 'Confirmar conferência';
 }
 
 function reiniciar() {
   document.getElementById('doneTela').classList.remove('visible');
   document.getElementById('telaInicial').classList.remove('hidden');
-  document.getElementById('btnVanuza').className = 'turno-btn';
-  document.getElementById('btnBrenda').className = 'turno-btn';
-  turnoAtual = null;
+  colabAtual = null;
+  aplicarDestaqueColab(null);
   ITENS.forEach(i => estado[i.id] = null);
 }
 </script>
