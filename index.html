@@ -267,6 +267,46 @@
   .obs-wrap textarea::placeholder { color: var(--muted); }
   .obs-label { font-size: 11px; font-weight: 600; color: var(--red); margin-bottom: 5px; display: block; }
 
+  /* FOTO */
+  .btn-foto {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1.5px dashed var(--red);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--red);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+  .btn-foto:hover { background: var(--red-soft); }
+  .btn-foto:disabled { opacity: 0.6; cursor: not-allowed; }
+  .foto-preview { margin-top: 8px; }
+  .foto-preview img {
+    max-width: 140px;
+    max-height: 140px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    display: block;
+    object-fit: cover;
+  }
+  .btn-foto-remover {
+    margin-top: 6px;
+    border: none;
+    background: none;
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+  }
+  .btn-foto-remover:hover { text-decoration: underline; }
+
   /* SUBMIT */
   .submit-wrap {
     margin-top: 24px;
@@ -400,6 +440,7 @@
 <!-- Firebase (SDK compat, sem necessidade de bundler) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 </head>
 <body>
 
@@ -447,6 +488,12 @@
         <div class="obs-wrap" id="obs-chao">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-chao" placeholder="Ex: resíduo próximo ao forno..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-chao" style="display:none" onchange="selecionarFoto('chao', this)">
+          <button type="button" class="btn-foto" id="btn-foto-chao" onclick="document.getElementById('foto-input-chao').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-chao" style="display:none">
+            <img id="foto-img-chao" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('chao')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -465,6 +512,12 @@
         <div class="obs-wrap" id="obs-bancadas">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-bancadas" placeholder="Ex: restos de alimento na bancada direita..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-bancadas" style="display:none" onchange="selecionarFoto('bancadas', this)">
+          <button type="button" class="btn-foto" id="btn-foto-bancadas" onclick="document.getElementById('foto-input-bancadas').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-bancadas" style="display:none">
+            <img id="foto-img-bancadas" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('bancadas')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -483,6 +536,12 @@
         <div class="obs-wrap" id="obs-estufa">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-estufa" placeholder="Ex: bandejas com gordura acumulada..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-estufa" style="display:none" onchange="selecionarFoto('estufa', this)">
+          <button type="button" class="btn-foto" id="btn-foto-estufa" onclick="document.getElementById('foto-input-estufa').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-estufa" style="display:none">
+            <img id="foto-img-estufa" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('estufa')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -501,6 +560,12 @@
         <div class="obs-wrap" id="obs-pia">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-pia" placeholder="Ex: ralo entupido..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-pia" style="display:none" onchange="selecionarFoto('pia', this)">
+          <button type="button" class="btn-foto" id="btn-foto-pia" onclick="document.getElementById('foto-input-pia').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-pia" style="display:none">
+            <img id="foto-img-pia" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('pia')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -525,6 +590,12 @@
         <div class="obs-wrap" id="obs-misteira">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-misteira" placeholder="Ex: resíduo de açaí na pá..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-misteira" style="display:none" onchange="selecionarFoto('misteira', this)">
+          <button type="button" class="btn-foto" id="btn-foto-misteira" onclick="document.getElementById('foto-input-misteira').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-misteira" style="display:none">
+            <img id="foto-img-misteira" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('misteira')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -543,6 +614,12 @@
         <div class="obs-wrap" id="obs-microondas">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-microondas" placeholder="Ex: respingos de molho no teto interno..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-microondas" style="display:none" onchange="selecionarFoto('microondas', this)">
+          <button type="button" class="btn-foto" id="btn-foto-microondas" onclick="document.getElementById('foto-input-microondas').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-microondas" style="display:none">
+            <img id="foto-img-microondas" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('microondas')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -561,6 +638,12 @@
         <div class="obs-wrap" id="obs-forno">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-forno" placeholder="Ex: gordura acumulada nas grelhas..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-forno" style="display:none" onchange="selecionarFoto('forno', this)">
+          <button type="button" class="btn-foto" id="btn-foto-forno" onclick="document.getElementById('foto-input-forno').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-forno" style="display:none">
+            <img id="foto-img-forno" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('forno')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -585,6 +668,12 @@
         <div class="obs-wrap" id="obs-geladeira">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-geladeira" placeholder="Ex: suco de laranja em falta..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-geladeira" style="display:none" onchange="selecionarFoto('geladeira', this)">
+          <button type="button" class="btn-foto" id="btn-foto-geladeira" onclick="document.getElementById('foto-input-geladeira').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-geladeira" style="display:none">
+            <img id="foto-img-geladeira" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('geladeira')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -603,6 +692,12 @@
         <div class="obs-wrap" id="obs-fermentando">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-fermentando" placeholder="Ex: massa não preparada..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-fermentando" style="display:none" onchange="selecionarFoto('fermentando', this)">
+          <button type="button" class="btn-foto" id="btn-foto-fermentando" onclick="document.getElementById('foto-input-fermentando').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-fermentando" style="display:none">
+            <img id="foto-img-fermentando" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('fermentando')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -621,6 +716,12 @@
         <div class="obs-wrap" id="obs-embalados">
           <span class="obs-label">Descreva o problema:</span>
           <textarea id="txt-embalados" placeholder="Ex: salgados soltos sem embalagem na geladeira..."></textarea>
+          <input type="file" accept="image/*" capture="environment" id="foto-input-embalados" style="display:none" onchange="selecionarFoto('embalados', this)">
+          <button type="button" class="btn-foto" id="btn-foto-embalados" onclick="document.getElementById('foto-input-embalados').click()">📷 Adicionar foto</button>
+          <div class="foto-preview" id="foto-preview-embalados" style="display:none">
+            <img id="foto-img-embalados" src="" alt="Foto anexada">
+            <button type="button" class="btn-foto-remover" onclick="removerFoto('embalados')">✕ Remover foto</button>
+          </div>
         </div>
       </div>
 
@@ -673,6 +774,37 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
+
+// Reduz a foto (redimensiona + comprime) antes de enviar, pra ficar rápido
+// mesmo com internet ruim do restaurante.
+function comprimirImagem(file, maxWidth = 1280, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round(height * (maxWidth / width));
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Falha ao comprimir imagem'));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = () => reject(new Error('Falha ao carregar imagem'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Falha ao ler arquivo'));
+    reader.readAsDataURL(file);
+  });
+}
 
 function hexToRgba(hex, alpha) {
   let h = String(hex).replace('#','');
@@ -718,7 +850,49 @@ const ITENS = [
 
 let colabAtual = null;
 let estado = {}; // { id: 'ok' | 'nok' | null }
+let fotos = {}; // { id: Blob } — foto já comprimida, pronta pra enviar
 let FUNCIONARIOS_TECHOUT = [];
+
+async function selecionarFoto(itemId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const btn = document.getElementById('btn-foto-' + itemId);
+  const originalLabel = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Processando…'; }
+  try {
+    const blob = await comprimirImagem(file);
+    fotos[itemId] = blob;
+    const url = URL.createObjectURL(blob);
+    const img = document.getElementById('foto-img-' + itemId);
+    if (img) {
+      if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+      img.src = url;
+    }
+    const preview = document.getElementById('foto-preview-' + itemId);
+    if (preview) preview.style.display = 'block';
+    if (btn) btn.style.display = 'none';
+  } catch (err) {
+    console.error('Erro ao processar foto:', err);
+    alert('Não foi possível processar essa foto. Tente outra.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = originalLabel || '📷 Adicionar foto'; }
+  }
+}
+
+function removerFoto(itemId) {
+  delete fotos[itemId];
+  const input = document.getElementById('foto-input-' + itemId);
+  if (input) input.value = '';
+  const img = document.getElementById('foto-img-' + itemId);
+  if (img) {
+    if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+    img.src = '';
+  }
+  const preview = document.getElementById('foto-preview-' + itemId);
+  if (preview) preview.style.display = 'none';
+  const btn = document.getElementById('btn-foto-' + itemId);
+  if (btn) { btn.style.display = 'flex'; btn.textContent = '📷 Adicionar foto'; }
+}
 
 // init
 ITENS.forEach(i => estado[i.id] = null);
@@ -781,6 +955,7 @@ function selecionarColab(id) {
     document.getElementById('item-' + i.id).className = 'item';
     document.getElementById('obs-' + i.id).classList.remove('visible');
     document.getElementById('txt-' + i.id).value = '';
+    removerFoto(i.id);
   });
   atualizar();
 }
@@ -830,11 +1005,34 @@ async function finalizar() {
     if (cat) discordancias[cat]++;
   });
 
+  const btnSubmit = document.getElementById('btnSubmit');
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = 'Enviando fotos…';
+
+  // Envia as fotos anexadas (se houver) pro Firebase Storage antes de salvar o registro
+  const fotosUrls = {};
+  try {
+    const entradas = Object.entries(fotos);
+    await Promise.all(entradas.map(async ([itemId, blob]) => {
+      const caminho = `checklists/${func.id}/${dataISO}/${itemId}.jpg`;
+      const ref = storage.ref().child(caminho);
+      await ref.put(blob, { contentType: 'image/jpeg' });
+      fotosUrls[itemId] = await ref.getDownloadURL();
+    }));
+  } catch (err) {
+    console.error('Erro ao enviar fotos:', err);
+    alert('Não foi possível enviar as fotos anexadas. Verifique sua internet e tente novamente.');
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'Confirmar conferência';
+    return;
+  }
+
   const itensSalvos = ITENS.map(item => ({
     id: item.id,
     label: item.label,
     status: estado[item.id] || null,
     obs: (document.getElementById('txt-' + item.id).value || '').trim(),
+    foto: fotosUrls[item.id] || null,
   }));
 
   const registro = {
@@ -851,9 +1049,7 @@ async function finalizar() {
     totalNok: noks.length,
   };
 
-  const btnSubmit = document.getElementById('btnSubmit');
-  btnSubmit.disabled = true;
-  btnSubmit.textContent = 'Enviando…';
+  btnSubmit.textContent = 'Salvando…';
 
   try {
     // um documento por funcionário por dia (reenvio no mesmo dia substitui o anterior)
@@ -893,6 +1089,7 @@ async function finalizar() {
         <div class="dr-text">
           <div>${item.label}</div>
           ${obs ? `<div class="dr-obs">${obs}</div>` : ''}
+          ${fotosUrls[item.id] ? `<div class="dr-obs">📷 foto anexada</div>` : ''}
         </div>
         <span class="dr-status ${statusClass}">${statusLabel}</span>
       </div>`;
@@ -921,6 +1118,7 @@ async function finalizar() {
       const obs = document.getElementById('txt-' + item.id).value.trim();
       msg += `  ${item.icon} ${item.label}`;
       if (obs) msg += `\n     ↳ ${obs}`;
+      if (fotosUrls[item.id]) msg += `\n     📷 ${fotosUrls[item.id]}`;
       msg += `\n`;
     });
   } else {
@@ -941,7 +1139,7 @@ function reiniciar() {
   document.getElementById('telaInicial').classList.remove('hidden');
   colabAtual = null;
   aplicarDestaqueColab(null);
-  ITENS.forEach(i => estado[i.id] = null);
+  ITENS.forEach(i => { estado[i.id] = null; removerFoto(i.id); });
 }
 </script>
 
